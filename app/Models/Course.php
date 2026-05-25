@@ -14,11 +14,16 @@ class Course extends Model
         'slug',
         'description',
         'level',
-        'category',
+        'category_id',
         'duration',
         'thumbnail',
         'teacher_id',
     ];
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
 
     public function teacher()
     {
@@ -38,5 +43,10 @@ class Course extends Model
     public function quizzes()
     {
         return $this->hasMany(Quiz::class);
+    }
+
+    public function documents()
+    {
+        return $this->hasMany(CourseDocument::class);
     }
 }

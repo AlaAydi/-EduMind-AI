@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('slug')->unique();
             $table->text('description');
             $table->string('level'); // beginner, intermediate, advanced
-            $table->string('category'); // e.g. Programming, Design, Business, AI
+            $table->foreignId('category_id')->constrained('categories')->onDelete('cascade');
             $table->string('duration'); // e.g. "5h 20m"
             $table->string('thumbnail')->nullable();
             $table->foreignId('teacher_id')->constrained('users')->onDelete('cascade');

@@ -38,6 +38,53 @@ class QuizController extends Controller
     }
 
     /**
+     * Show the form for creating a new quiz.
+     */
+    public function create()
+    {
+        $user = Auth::user();
+        if (!$user->isTeacher() && !$user->isAdmin()) {
+            return redirect()->route('dashboard')->with('error', 'Unauthorized');
+        }
+
+        $courses = Course::where('teacher_id', $user->id)->get();
+        return view('quizzes.create', compact('courses'));
+    }
+
+    /**
+     * Store a newly created quiz in database.
+     */
+    public function store(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user->isTeacher() && !$user->isAdmin()) {
+            return redirect()->route('dashboard')->with('error', 'Unauthorized');
+        }
+
+        $request->validate([
+            'course_id' => 'required|exists:courses,id',
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'passing_score' => 'required|integer|min:0|max:100',
+        ]);
+
+        // Verify the course belongs to the teacher
+        $course = Course::findOrFail($request->course_id);
+        if ($course->teacher_id !== $user->id && !$user->isAdmin()) {
+            return redirect()->route('dashboard')->with('error', 'Unauthorized');
+        }
+
+        $quiz = Quiz::create([
+            'course_id' => $request->course_id,
+            'title' => $request->title,
+            'description' => $request->description,
+            'passing_score' => $request->passing_score,
+        ]);
+
+        return redirect()->route('quizzes.index')->with('success', 'Quiz created successfully!');
+    }
+
+    /**
      * Show quiz instructions.
      */
     public function show(Quiz $quiz)
@@ -52,6 +99,61 @@ class QuizController extends Controller
         }
 
         return view('quizzes.show', compact('quiz'));
+    }
+
+    /**
+     * Show the form for editing the specified quiz.
+     */
+    public function edit(Quiz $quiz)
+    {
+        $user = Auth::user();
+        if ($quiz->course->teacher_id !== $user->id && !$user->isAdmin()) {
+            return redirect()->route('dashboard')->with('error', 'Unauthorized');
+        }
+
+        $courses = Course::where('teacher_id', $user->id)->get();
+        return view('quizzes.edit', compact('quiz', 'courses'));
+    }
+
+    /**
+     * Update the specified quiz in storage.
+     */
+    public function update(Request $request, Quiz $quiz)
+    {
+        $user = Auth::user();
+        if ($quiz->course->teacher_id !== $user->id && !$user->isAdmin()) {
+            return redirect()->route('dashboard')->with('error', 'Unauthorized');
+        }
+
+        $request->validate([
+            'course_id' => 'required|exists:courses,id',
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'passing_score' => 'required|integer|min:0|max:100',
+        ]);
+
+        $quiz->update([
+            'course_id' => $request->course_id,
+            'title' => $request->title,
+            'description' => $request->description,
+            'passing_score' => $request->passing_score,
+        ]);
+
+        return redirect()->route('quizzes.index')->with('success', 'Quiz updated successfully!');
+    }
+
+    /**
+     * Remove the specified quiz from storage.
+     */
+    public function destroy(Quiz $quiz)
+    {
+        $user = Auth::user();
+        if ($quiz->course->teacher_id !== $user->id && !$user->isAdmin()) {
+            return redirect()->route('dashboard')->with('error', 'Unauthorized');
+        }
+
+        $quiz->delete();
+        return redirect()->route('quizzes.index')->with('success', 'Quiz deleted successfully.');
     }
 
     /**

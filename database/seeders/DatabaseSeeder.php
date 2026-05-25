@@ -10,6 +10,8 @@ use App\Models\Question;
 use App\Models\QuizAttempt;
 use App\Models\ChatMessage;
 use App\Models\ActivityLog;
+use App\Models\Category;
+use App\Models\CourseDocument;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
@@ -65,6 +67,12 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
+        // 1.5 Create Categories
+        $catAI = Category::create(['name' => 'Artificial Intelligence', 'slug' => 'artificial-intelligence']);
+        $catWeb = Category::create(['name' => 'Web Development', 'slug' => 'web-development']);
+        $catData = Category::create(['name' => 'Data Science', 'slug' => 'data-science']);
+        $catDesign = Category::create(['name' => 'Design Systems', 'slug' => 'design-systems']);
+
         // 2. Create Courses
         $courses = [
             [
@@ -72,7 +80,7 @@ class DatabaseSeeder extends Seeder
                 'slug' => 'advanced-prompt-engineering-llms',
                 'description' => 'Master the art of prompt design, system instructions, and chained operations to command models like Gemini, Claude, and GPT-4. Understand how temperature, top-k, and embeddings shape AI responses.',
                 'level' => 'Beginner',
-                'category' => 'Artificial Intelligence',
+                'category_id' => $catAI->id,
                 'duration' => '4h 15m',
                 'thumbnail' => 'https://images.unsplash.com/photo-1677442136019-21780efad99a?auto=format&fit=crop&w=600&q=80',
                 'teacher_id' => $teacher->id,
@@ -82,7 +90,7 @@ class DatabaseSeeder extends Seeder
                 'slug' => 'mastering-laravel-blade-component-design',
                 'description' => 'Dive deep into Laravel\'s templating engine. Build scalable layout inheritance architectures, learn component caching, manage scoped data-binding, and craft visual component libraries using clean Tailwind CSS utilities.',
                 'level' => 'Intermediate',
-                'category' => 'Web Development',
+                'category_id' => $catWeb->id,
                 'duration' => '6h 30m',
                 'thumbnail' => 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=600&q=80',
                 'teacher_id' => $teacher->id,
@@ -92,7 +100,7 @@ class DatabaseSeeder extends Seeder
                 'slug' => 'data-visualization-python-apexcharts',
                 'description' => 'Turn dry databases into gorgeous interactive, animated reports. Learn to extract patterns, preprocess datasets in Python, and feed cleaner JSON payloads directly into highly interactive dark-themed ApexCharts dashboards.',
                 'level' => 'Intermediate',
-                'category' => 'Data Science',
+                'category_id' => $catData->id,
                 'duration' => '5h 45m',
                 'thumbnail' => 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=600&q=80',
                 'teacher_id' => $anotherTeacher->id,
@@ -102,7 +110,7 @@ class DatabaseSeeder extends Seeder
                 'slug' => 'figma-tailwind-css-design-masterclass',
                 'description' => 'Bridge the gap between design and implementation. Learn spacing systems, visual hierarchy, premium glassmorphic cards, custom animations, and layout grids to construct professional startups aesthetics from high-fidelity mockups.',
                 'level' => 'Beginner',
-                'category' => 'Design Systems',
+                'category_id' => $catDesign->id,
                 'duration' => '8h 15m',
                 'thumbnail' => 'https://images.unsplash.com/photo-1541462608141-2ff030a64e43?auto=format&fit=crop&w=600&q=80',
                 'teacher_id' => $anotherTeacher->id,
@@ -112,6 +120,22 @@ class DatabaseSeeder extends Seeder
         $createdCourses = [];
         foreach ($courses as $c) {
             $createdCourses[] = Course::create($c);
+        }
+
+        // Add dummy documents to courses
+        foreach($createdCourses as $c) {
+            CourseDocument::create([
+                'course_id' => $c->id,
+                'title' => 'Course Syllabus & Setup Guide',
+                'file_path' => '#',
+                'type' => 'pdf'
+            ]);
+            CourseDocument::create([
+                'course_id' => $c->id,
+                'title' => 'Lecture 1 Video Recording',
+                'file_path' => '#',
+                'type' => 'video'
+            ]);
         }
 
         // 3. Create Enrollments

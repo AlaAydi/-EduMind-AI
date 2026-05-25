@@ -1,10 +1,19 @@
 <x-app-layout :title="'Active Evaluations - EduMind AI'">
     
     <!-- Header -->
-    <div class="mb-8 relative z-10">
-        <span class="text-xs font-bold text-purple-400 uppercase tracking-widest">Academic Testing</span>
-        <h2 class="text-3xl font-extrabold text-white mt-1">Quizzes & Evaluations</h2>
-        <p class="text-xs text-slate-450 mt-1">Complete course quizzes to unlock certified credentials and earn progression XP.</p>
+    <div class="mb-8 flex justify-between items-end relative z-10">
+        <div>
+            <span class="text-xs font-bold text-purple-400 uppercase tracking-widest">Academic Testing</span>
+            <h2 class="text-3xl font-extrabold text-white mt-1">Quizzes & Evaluations</h2>
+            <p class="text-xs text-slate-450 mt-1">Complete course quizzes to unlock certified credentials and earn progression XP.</p>
+        </div>
+        @if (auth()->user()->isTeacher() || auth()->user()->isAdmin())
+            <div>
+                <a href="{{ route('quizzes.create') }}" class="px-5 py-2.5 bg-gradient-to-r from-purple-500 to-indigo-500 text-white text-xs font-bold rounded-xl shadow-glow shadow-purple-500/20 hover:shadow-purple-500/30 hover:-translate-y-0.5 transition-all inline-block">
+                    + Add New Quiz
+                </a>
+            </div>
+        @endif
     </div>
 
     <!-- Main Grid scaffolding -->
@@ -56,11 +65,21 @@
                                     </td>
                                 @endif
 
-                                <td class="py-4 px-5 text-center">
-                                    @if (auth()->user()->isTeacher())
+                                <td class="py-4 px-5 text-center flex items-center justify-center gap-2">
+                                    @if (auth()->user()->isTeacher() || auth()->user()->isAdmin())
                                         <a href="{{ route('quizzes.show', $quiz->id) }}" class="px-3.5 py-1.5 rounded-lg border border-slate-800 bg-slate-950 hover:bg-slate-900 text-[11px] font-bold text-slate-350 hover:text-white transition-all inline-block">
                                             Preview
                                         </a>
+                                        <a href="{{ route('quizzes.edit', $quiz->id) }}" class="px-3.5 py-1.5 rounded-lg border border-slate-800 bg-slate-950 hover:bg-slate-900 text-[11px] font-bold text-slate-350 hover:text-white transition-all inline-block">
+                                            Edit
+                                        </a>
+                                        <form action="{{ route('quizzes.destroy', $quiz->id) }}" method="POST" class="m-0" onsubmit="return confirm('Delete this quiz?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="px-3.5 py-1.5 rounded-lg border border-red-500/20 bg-red-500/10 hover:bg-red-500 hover:text-white text-[11px] font-bold text-red-400 transition-all inline-block">
+                                                Delete
+                                            </button>
+                                        </form>
                                     @else
                                         <a href="{{ route('quizzes.show', $quiz->id) }}" class="px-3.5 py-1.5 rounded-lg text-[11px] font-bold text-white transition-all inline-block {{ $hasPassed ? 'border border-emerald-500/20 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/25' : 'bg-purple-500 hover:bg-purple-600 shadow-glow shadow-purple-500/10 hover:shadow-purple-500/20' }}">
                                             {{ $hasPassed ? 'Retake (Pass)' : ($attemptsCount > 0 ? 'Try Again' : 'Take Exam') }}

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Course;
+use App\Models\Category;
+use App\Models\CourseDocument;
 use App\Models\Enrollment;
 use App\Models\ActivityLog;
 use Illuminate\Http\Request;
@@ -49,7 +51,8 @@ class CourseController extends Controller
             return redirect()->route('dashboard')->with('error', 'Only teachers can create courses.');
         }
 
-        return view('courses.create');
+        $categories = Category::all();
+        return view('courses.create', compact('categories'));
     }
 
     /**
@@ -65,7 +68,7 @@ class CourseController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'level' => 'required|string|in:Beginner,Intermediate,Advanced',
-            'category' => 'required|string|max:255',
+            'category_id' => 'required|exists:categories,id',
             'duration' => 'required|string|max:100',
             'thumbnail' => 'nullable|url',
         ]);
@@ -79,7 +82,7 @@ class CourseController extends Controller
             'slug' => $slug,
             'description' => $request->description,
             'level' => $request->level,
-            'category' => $request->category,
+            'category_id' => $request->category_id,
             'duration' => $request->duration,
             'thumbnail' => $thumbnail,
             'teacher_id' => Auth::id(),
@@ -104,20 +107,70 @@ class CourseController extends Controller
         $quizzes = $course->quizzes;
 
         if ($enrollment || $user->isTeacher()) {
-            // Classroom view: load a mock syllabus list
-            $lessons = [
-                ['id' => 1, 'title' => 'Introduction and Core Framework Structure', 'duration' => '12m'],
-                ['id' => 2, 'title' => 'Context Management & Dynamic State Binding', 'duration' => '25m'],
-                ['id' => 3, 'title' => 'Advanced Visual Designing with Layout Grids', 'duration' => '18m'],
-                ['id' => 4, 'title' => 'Optimizing Production Assets & Bundle Sizes', 'duration' => '30m'],
-                ['id' => 5, 'title' => 'Final Cohort Evaluation and Sandbox Test', 'duration' => '15m'],
-            ];
+            // Classroom view: load documents
+            $lessons = $course->documents;
 
             return view('courses.show', compact('course', 'enrollment', 'lessons', 'quizzes'));
         }
 
         // Preview view
         return view('courses.preview', compact('course', 'quizzes'));
+    }
+
+    /**
+     * Show the form for editing the specified course.
+     */
+    public function edit(Course $course)
+    {
+        if (Auth::id() !== $course->teacher_id && !Auth::user()->isAdmin()) {
+            return redirect()->route('dashboard')->with('error', 'Unauthorized.');
+        }
+
+        $categories = Category::all();
+        return view('courses.edit', compact('course', 'categories'));
+    }
+
+    /**
+     * Update the specified course in storage.
+     */
+    public function update(Request $request, Course $course)
+    {
+        if (Auth::id() !== $course->teacher_id && !Auth::user()->isAdmin()) {
+            return redirect()->route('dashboard')->with('error', 'Unauthorized.');
+        }
+
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'level' => 'required|string|in:Beginner,Intermediate,Advanced',
+            'category_id' => 'required|exists:categories,id',
+            'duration' => 'required|string|max:100',
+            'thumbnail' => 'nullable|url',
+        ]);
+
+        $course->update([
+            'title' => $request->title,
+            'description' => $request->description,
+            'level' => $request->level,
+            'category_id' => $request->category_id,
+            'duration' => $request->duration,
+            'thumbnail' => $request->thumbnail ?: $course->thumbnail,
+        ]);
+
+        return redirect()->route('courses.show', $course->id)->with('success', 'Course updated successfully!');
+    }
+
+    /**
+     * Remove the specified course from storage.
+     */
+    public function destroy(Course $course)
+    {
+        if (Auth::id() !== $course->teacher_id && !Auth::user()->isAdmin()) {
+            return redirect()->route('dashboard')->with('error', 'Unauthorized.');
+        }
+
+        $course->delete();
+        return redirect()->route('dashboard')->with('success', 'Course deleted successfully.');
     }
 
     /**

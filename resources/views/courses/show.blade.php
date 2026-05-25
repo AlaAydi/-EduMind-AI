@@ -17,6 +17,17 @@
                 </x-gradient-badge>
             </div>
         @endif
+        
+        @if(Auth::id() === $course->teacher_id || Auth::user()->isAdmin())
+            <div class="flex gap-2">
+                <a href="{{ route('courses.edit', $course->id) }}" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-xl transition-all">Edit</a>
+                <form action="{{ route('courses.destroy', $course->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this course?');" class="m-0">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="px-4 py-2 bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white text-xs font-bold rounded-xl transition-all border border-red-500/30">Delete</button>
+                </form>
+            </div>
+        @endif
     </div>
 
     <!-- Main Scaffolding -->
@@ -50,7 +61,7 @@
             <!-- Lesson Content -->
             <x-glass-card class="p-6 space-y-4">
                 <div class="flex items-center gap-3">
-                    <span class="text-xs font-bold text-purple-400 uppercase tracking-widest">{{ $course->category }}</span>
+                    <span class="text-xs font-bold text-purple-400 uppercase tracking-widest">{{ $course->category->name ?? 'Uncategorized' }}</span>
                     <span class="w-1 h-1 rounded-full bg-slate-700"></span>
                     <span class="text-xs text-slate-500 font-bold uppercase tracking-wider">Lesson 1 of 5</span>
                 </div>
@@ -144,9 +155,9 @@
                                         </svg>
                                     @endif
                                 </div>
-                                <span class="text-xs font-bold truncate leading-none mt-0.5">{{ $les['title'] }}</span>
+                                <span class="text-xs font-bold truncate leading-none mt-0.5">{{ $les->title }}</span>
                             </div>
-                            <span class="text-[10px] font-semibold text-slate-500 flex-shrink-0">{{ $les['duration'] }}</span>
+                            <span class="text-[10px] font-semibold text-slate-500 flex-shrink-0 uppercase">{{ $les->type }}</span>
                         </div>
                     @endforeach
                 </div>
