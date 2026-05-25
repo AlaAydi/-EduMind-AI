@@ -1,0 +1,197 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Course;
+use App\Models\Enrollment;
+use App\Models\ActivityLog;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
+
+class CourseController extends Controller
+{
+    /**
+     * Display a listing of the courses.
+     */
+    public function index(Request $request)
+    {
+        $query = Course::with('teacher');
+
+        // Apply filters
+        if ($request->filled('search')) {
+            $query->where('title', 'like', '%' . $request->search . '%')
+                  ->orWhere('description', 'like', '%' . $request->search . '%');
+        }
+
+        if ($request->filled('category')) {
+            $query->where('category', $request->category);
+        }
+
+        if ($request->filled('level')) {
+            $query->where('level', $request->level);
+        }
+
+        $courses = $query->latest()->get();
+
+        // Get user's enrollment ids to highlight enrolled states
+        $userEnrollments = Auth::user()->enrollments->pluck('progress', 'course_id')->toArray();
+
+        return view('courses.index', compact('courses', 'userEnrollments'));
+    }
+
+    /**
+     * Show the form for creating a new course.
+     */
+    public function create()
+    {
+        if (!Auth::user()->isTeacher()) {
+            return redirect()->route('dashboard')->with('error', 'Only teachers can create courses.');
+        }
+
+        return view('courses.create');
+    }
+
+    /**
+     * Store a newly created course in database.
+     */
+    public function store(Request $request)
+    {
+        if (!Auth::user()->isTeacher()) {
+            return redirect()->route('dashboard')->with('error', 'Unauthorized.');
+        }
+
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'level' => 'required|string|in:Beginner,Intermediate,Advanced',
+            'category' => 'required|string|max:255',
+            'duration' => 'required|string|max:100',
+            'thumbnail' => 'nullable|url',
+        ]);
+
+        $slug = Str::slug($request->title) . '-' . rand(100, 999);
+        
+        $thumbnail = $request->thumbnail ?: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=600&q=80';
+
+        Course::create([
+            'title' => $request->title,
+            'slug' => $slug,
+            'description' => $request->description,
+            'level' => $request->level,
+            'category' => $request->category,
+            'duration' => $request->duration,
+            'thumbnail' => $thumbnail,
+            'teacher_id' => Auth::id(),
+        ]);
+
+        return redirect()->route('dashboard')->with('success', 'Course successfully designed and deployed!');
+    }
+
+    /**
+     * Display the specified course.
+     */
+    public function show(Course $course)
+    {
+        $user = Auth::user();
+        
+        // Check if student is enrolled
+        $enrollment = Enrollment::where('user_id', $user->id)
+            ->where('course_id', $course->id)
+            ->first();
+
+        // Load course quizzes
+        $quizzes = $course->quizzes;
+
+        if ($enrollment || $user->isTeacher()) {
+            // Classroom view: load a mock syllabus list
+            $lessons = [
+                ['id' => 1, 'title' => 'Introduction and Core Framework Structure', 'duration' => '12m'],
+                ['id' => 2, 'title' => 'Context Management & Dynamic State Binding', 'duration' => '25m'],
+                ['id' => 3, 'title' => 'Advanced Visual Designing with Layout Grids', 'duration' => '18m'],
+                ['id' => 4, 'title' => 'Optimizing Production Assets & Bundle Sizes', 'duration' => '30m'],
+                ['id' => 5, 'title' => 'Final Cohort Evaluation and Sandbox Test', 'duration' => '15m'],
+            ];
+
+            return view('courses.show', compact('course', 'enrollment', 'lessons', 'quizzes'));
+        }
+
+        // Preview view
+        return view('courses.preview', compact('course', 'quizzes'));
+    }
+
+    /**
+     * Enroll the student in a course.
+     */
+    public function enroll(Course $course)
+    {
+        $user = Auth::user();
+
+        if ($user->isTeacher()) {
+            return redirect()->back()->with('error', 'Instructors cannot enroll in modules.');
+        }
+
+        // Check if already enrolled
+        $exists = Enrollment::where('user_id', $user->id)
+            ->where('course_id', $course->id)
+            ->exists();
+
+        if ($exists) {
+            return redirect()->route('courses.show', $course->id);
+        }
+
+        Enrollment::create([
+            'user_id' => $user->id,
+            'course_id' => $course->id,
+            'progress' => 0,
+            'status' => 'active',
+        ]);
+
+        ActivityLog::create([
+            'user_id' => $user->id,
+            'activity_type' => 'course_started',
+            'description' => "Enrolled in course: " . $course->title,
+        ]);
+
+        return redirect()->route('courses.show', $course->id)->with('success', 'Successfully enrolled! Welcome to the classroom.');
+    }
+
+    /**
+     * Update student progress percentage in a course.
+     */
+    public function updateProgress(Request $request, Course $course)
+    {
+        $user = Auth::user();
+        
+        $enrollment = Enrollment::where('user_id', $user->id)
+            ->where('course_id', $course->id)
+            ->firstOrFail();
+
+        $request->validate([
+            'progress' => 'required|integer|min:0|max:100'
+        ]);
+
+        $newProgress = $request->progress;
+        
+        $status = $newProgress >= 100 ? 'completed' : 'active';
+
+        $wasCompleted = $enrollment->status === 'completed';
+
+        $enrollment->update([
+            'progress' => $newProgress,
+            'status' => $status
+        ]);
+
+        if ($status === 'completed' && !$wasCompleted) {
+            ActivityLog::create([
+                'user_id' => $user->id,
+                'activity_type' => 'certificate',
+                'description' => "Successfully finished " . $course->title . " and earned a Certificate of Achievement!",
+            ]);
+
+            return redirect()->back()->with('success', 'Congratulations! Course finished. Your completion certificate has been unlocked.');
+        }
+
+        return redirect()->back()->with('success', 'Progress updated successfully.');
+    }
+}
