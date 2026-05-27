@@ -26,8 +26,8 @@
                     <button @click="sendPrompt('Explain the core idea of Prompt Engineering')" class="w-full text-left p-3.5 bg-slate-950/50 border border-slate-900 rounded-2xl hover:border-purple-500/30 hover:bg-slate-900/30 text-xs font-semibold text-slate-350 hover:text-white transition-all duration-300">
                         "Explain Prompt Engineering..."
                     </button>
-                    <button @click="sendPrompt('What is the difference between @extends and @include in Laravel Blade?')" class="w-full text-left p-3.5 bg-slate-950/50 border border-slate-900 rounded-2xl hover:border-purple-500/30 hover:bg-slate-900/30 text-xs font-semibold text-slate-350 hover:text-white transition-all duration-300">
-                        "Blade @extends vs @include..."
+                    <button @click="sendPrompt('What is the difference between @@extends and @@include in Laravel Blade?')" class="w-full text-left p-3.5 bg-slate-950/50 border border-slate-900 rounded-2xl hover:border-purple-500/30 hover:bg-slate-900/30 text-xs font-semibold text-slate-350 hover:text-white transition-all duration-300">
+                        "Blade @@extends vs @@include..."
                     </button>
                     <button @click="sendPrompt('How does the XP system and Leveling work?')" class="w-full text-left p-3.5 bg-slate-950/50 border border-slate-900 rounded-2xl hover:border-purple-500/30 hover:bg-slate-900/30 text-xs font-semibold text-slate-350 hover:text-white transition-all duration-300">
                         "How do I gain Level XP..."
