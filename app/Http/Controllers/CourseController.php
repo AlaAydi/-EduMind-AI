@@ -19,6 +19,12 @@ class CourseController extends Controller
     public function index(Request $request)
     {
         $query = Course::with('teacher');
+        $user = Auth::user();
+
+        // If the user is a teacher, only show their own courses
+        if ($user->isTeacher()) {
+            $query->where('teacher_id', $user->id);
+        }
 
         // Apply filters
         if ($request->filled('search')) {

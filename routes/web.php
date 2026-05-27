@@ -37,6 +37,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/courses/{course}/enroll', [CourseController::class, 'enroll'])->name('courses.enroll');
     Route::post('/courses/{course}/progress', [CourseController::class, 'updateProgress'])->name('courses.progress');
 
+    // Course Documents
+    Route::post('/courses/{course}/documents', [\App\Http\Controllers\CourseDocumentController::class, 'store'])->name('courses.documents.store');
+    Route::delete('/documents/{document}', [\App\Http\Controllers\CourseDocumentController::class, 'destroy'])->name('courses.documents.destroy');
+
     Route::get('/quizzes', [QuizController::class, 'index'])->name('quizzes.index');
     Route::get('/quizzes/create', [QuizController::class, 'create'])->name('quizzes.create');
     Route::post('/quizzes', [QuizController::class, 'store'])->name('quizzes.store');

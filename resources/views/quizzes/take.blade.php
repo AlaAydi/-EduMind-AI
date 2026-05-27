@@ -20,7 +20,7 @@
 
         <div class="space-y-8">
             @foreach ($questions as $index => $q)
-                <x-glass-card class="p-6 md:p-8" x-data="{ selected: '' }">
+                <x-glass-card class="p-6 md:p-8" x-data="{ selected: [] }">
                     
                     <!-- Question Header -->
                     <div class="flex items-start gap-4 mb-6 border-b border-slate-900 pb-4">
@@ -35,44 +35,44 @@
                         
                         <!-- Option A -->
                         <label class="block cursor-pointer">
-                            <input type="radio" name="answers[{{ $q->id }}]" value="A" class="hidden" @click="selected = 'A'" required>
+                            <input type="checkbox" name="answers[{{ $q->id }}][]" value="A" class="hidden" x-model="selected">
                             <div class="p-4 rounded-2xl border text-xs font-semibold flex items-center gap-4 transition-all duration-300" 
-                                 :class="selected === 'A' ? 'bg-purple-500/10 border-purple-500 text-purple-300 shadow-glow shadow-purple-500/5' : 'bg-slate-950/40 border-slate-900 hover:bg-slate-900/30 text-slate-400 hover:text-slate-300'">
+                                 :class="selected.includes('A') ? 'bg-purple-500/10 border-purple-500 text-purple-300 shadow-glow shadow-purple-500/5' : 'bg-slate-950/40 border-slate-900 hover:bg-slate-900/30 text-slate-400 hover:text-slate-300'">
                                 <div class="w-6 h-6 rounded-lg bg-slate-900 border border-slate-850 flex items-center justify-center font-bold text-[10px] flex-shrink-0"
-                                     :class="selected === 'A' ? 'border-purple-450 text-purple-450' : 'text-slate-600'">A</div>
+                                     :class="selected.includes('A') ? 'border-purple-450 text-purple-450' : 'text-slate-600'">A</div>
                                 <span class="leading-relaxed">{{ $q->option_a }}</span>
                             </div>
                         </label>
 
                         <!-- Option B -->
                         <label class="block cursor-pointer">
-                            <input type="radio" name="answers[{{ $q->id }}]" value="B" class="hidden" @click="selected = 'B'">
+                            <input type="checkbox" name="answers[{{ $q->id }}][]" value="B" class="hidden" x-model="selected">
                             <div class="p-4 rounded-2xl border text-xs font-semibold flex items-center gap-4 transition-all duration-300" 
-                                 :class="selected === 'B' ? 'bg-purple-500/10 border-purple-500 text-purple-300 shadow-glow shadow-purple-500/5' : 'bg-slate-950/40 border-slate-900 hover:bg-slate-900/30 text-slate-400 hover:text-slate-300'">
+                                 :class="selected.includes('B') ? 'bg-purple-500/10 border-purple-500 text-purple-300 shadow-glow shadow-purple-500/5' : 'bg-slate-950/40 border-slate-900 hover:bg-slate-900/30 text-slate-400 hover:text-slate-300'">
                                 <div class="w-6 h-6 rounded-lg bg-slate-900 border border-slate-850 flex items-center justify-center font-bold text-[10px] flex-shrink-0"
-                                     :class="selected === 'B' ? 'border-purple-450 text-purple-450' : 'text-slate-600'">B</div>
+                                     :class="selected.includes('B') ? 'border-purple-450 text-purple-450' : 'text-slate-600'">B</div>
                                 <span class="leading-relaxed">{{ $q->option_b }}</span>
                             </div>
                         </label>
 
                         <!-- Option C -->
                         <label class="block cursor-pointer">
-                            <input type="radio" name="answers[{{ $q->id }}]" value="C" class="hidden" @click="selected = 'C'">
+                            <input type="checkbox" name="answers[{{ $q->id }}][]" value="C" class="hidden" x-model="selected">
                             <div class="p-4 rounded-2xl border text-xs font-semibold flex items-center gap-4 transition-all duration-300" 
-                                 :class="selected === 'C' ? 'bg-purple-500/10 border-purple-500 text-purple-300 shadow-glow shadow-purple-500/5' : 'bg-slate-950/40 border-slate-900 hover:bg-slate-900/30 text-slate-400 hover:text-slate-300'">
+                                 :class="selected.includes('C') ? 'bg-purple-500/10 border-purple-500 text-purple-300 shadow-glow shadow-purple-500/5' : 'bg-slate-950/40 border-slate-900 hover:bg-slate-900/30 text-slate-400 hover:text-slate-300'">
                                 <div class="w-6 h-6 rounded-lg bg-slate-900 border border-slate-850 flex items-center justify-center font-bold text-[10px] flex-shrink-0"
-                                     :class="selected === 'C' ? 'border-purple-450 text-purple-450' : 'text-slate-600'">C</div>
+                                     :class="selected.includes('C') ? 'border-purple-450 text-purple-450' : 'text-slate-600'">C</div>
                                 <span class="leading-relaxed">{{ $q->option_c }}</span>
                             </div>
                         </label>
 
                         <!-- Option D -->
                         <label class="block cursor-pointer">
-                            <input type="radio" name="answers[{{ $q->id }}]" value="D" class="hidden" @click="selected = 'D'">
+                            <input type="checkbox" name="answers[{{ $q->id }}][]" value="D" class="hidden" x-model="selected">
                             <div class="p-4 rounded-2xl border text-xs font-semibold flex items-center gap-4 transition-all duration-300" 
-                                 :class="selected === 'D' ? 'bg-purple-500/10 border-purple-500 text-purple-300 shadow-glow shadow-purple-500/5' : 'bg-slate-950/40 border-slate-900 hover:bg-slate-900/30 text-slate-400 hover:text-slate-300'">
+                                 :class="selected.includes('D') ? 'bg-purple-500/10 border-purple-500 text-purple-300 shadow-glow shadow-purple-500/5' : 'bg-slate-950/40 border-slate-900 hover:bg-slate-900/30 text-slate-400 hover:text-slate-300'">
                                 <div class="w-6 h-6 rounded-lg bg-slate-900 border border-slate-850 flex items-center justify-center font-bold text-[10px] flex-shrink-0"
-                                     :class="selected === 'D' ? 'border-purple-450 text-purple-450' : 'text-slate-600'">D</div>
+                                     :class="selected.includes('D') ? 'border-purple-450 text-purple-450' : 'text-slate-600'">D</div>
                                 <span class="leading-relaxed">{{ $q->option_d }}</span>
                             </div>
                         </label>

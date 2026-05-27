@@ -40,7 +40,7 @@ class QuizController extends Controller
     /**
      * Show the form for creating a new quiz.
      */
-    public function create()
+    public function create(Request $request)
     {
         $user = Auth::user();
         if (!$user->isTeacher() && !$user->isAdmin()) {
@@ -48,7 +48,9 @@ class QuizController extends Controller
         }
 
         $courses = Course::where('teacher_id', $user->id)->get();
-        return view('quizzes.create', compact('courses'));
+        $selectedCourseId = $request->query('course_id');
+        
+        return view('quizzes.create', compact('courses', 'selectedCourseId'));
     }
 
     /**
@@ -66,6 +68,14 @@ class QuizController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'passing_score' => 'required|integer|min:0|max:100',
+            'questions' => 'nullable|array',
+            'questions.*.question_text' => 'required|string',
+            'questions.*.option_a' => 'required|string',
+            'questions.*.option_b' => 'required|string',
+            'questions.*.option_c' => 'required|string',
+            'questions.*.option_d' => 'required|string',
+            'questions.*.correct_options' => 'required|array|min:1',
+            'questions.*.correct_options.*' => 'required|string|in:A,B,C,D',
         ]);
 
         // Verify the course belongs to the teacher
@@ -80,6 +90,20 @@ class QuizController extends Controller
             'description' => $request->description,
             'passing_score' => $request->passing_score,
         ]);
+
+        if ($request->has('questions')) {
+            foreach ($request->input('questions') as $qData) {
+                Question::create([
+                    'quiz_id' => $quiz->id,
+                    'question_text' => $qData['question_text'],
+                    'option_a' => $qData['option_a'],
+                    'option_b' => $qData['option_b'],
+                    'option_c' => $qData['option_c'],
+                    'option_d' => $qData['option_d'],
+                    'correct_option' => implode(',', $qData['correct_options']),
+                ]);
+            }
+        }
 
         return redirect()->route('quizzes.index')->with('success', 'Quiz created successfully!');
     }
@@ -130,6 +154,14 @@ class QuizController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'passing_score' => 'required|integer|min:0|max:100',
+            'questions' => 'nullable|array',
+            'questions.*.question_text' => 'required|string',
+            'questions.*.option_a' => 'required|string',
+            'questions.*.option_b' => 'required|string',
+            'questions.*.option_c' => 'required|string',
+            'questions.*.option_d' => 'required|string',
+            'questions.*.correct_options' => 'required|array|min:1',
+            'questions.*.correct_options.*' => 'required|string|in:A,B,C,D',
         ]);
 
         $quiz->update([
@@ -138,6 +170,23 @@ class QuizController extends Controller
             'description' => $request->description,
             'passing_score' => $request->passing_score,
         ]);
+
+        // Rebuild questions
+        $quiz->questions()->delete();
+
+        if ($request->has('questions')) {
+            foreach ($request->input('questions') as $qData) {
+                Question::create([
+                    'quiz_id' => $quiz->id,
+                    'question_text' => $qData['question_text'],
+                    'option_a' => $qData['option_a'],
+                    'option_b' => $qData['option_b'],
+                    'option_c' => $qData['option_c'],
+                    'option_d' => $qData['option_d'],
+                    'correct_option' => implode(',', $qData['correct_options']),
+                ]);
+            }
+        }
 
         return redirect()->route('quizzes.index')->with('success', 'Quiz updated successfully!');
     }
@@ -188,16 +237,23 @@ class QuizController extends Controller
         $questions = $quiz->questions;
 
         $request->validate([
-            'answers' => 'required|array',
-            'answers.*' => 'required|string|in:A,B,C,D'
+            'answers' => 'nullable|array',
+            'answers.*' => 'nullable|array',
+            'answers.*.*' => 'required|string|in:A,B,C,D'
         ]);
 
-        $submittedAnswers = $request->answers;
+        $submittedAnswers = $request->answers ?? [];
         $correctCount = 0;
 
         foreach ($questions as $q) {
-            $subAnswer = $submittedAnswers[$q->id] ?? null;
-            if ($subAnswer === $q->correct_option) {
+            $studentAnswers = $submittedAnswers[$q->id] ?? [];
+            $correctAnswers = explode(',', $q->correct_option);
+
+            // Sort both arrays to compare properly
+            sort($studentAnswers);
+            sort($correctAnswers);
+
+            if ($studentAnswers === $correctAnswers) {
                 $correctCount++;
             }
         }

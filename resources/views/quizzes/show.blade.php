@@ -46,7 +46,7 @@
                 <h4 class="font-bold text-slate-200">Evaluation Instructions:</h4>
                 <ul class="list-disc pl-5 space-y-2.5">
                     <li>This evaluation checks knowledge nodes accumulated throughout the corresponding chapters.</li>
-                    <li>Questions are multiple-choice options (A, B, C, or D). Pick the single most accurate option.</li>
+                    <li>Questions are multiple-choice options (A, B, C, or D). Pick one or more correct options.</li>
                     <li>You can take this quiz multiple times; however, only scoring above <span class="text-purple-450 font-bold">{{ $quiz->passing_score }}%</span> unlocks XP certificates.</li>
                 </ul>
             </div>

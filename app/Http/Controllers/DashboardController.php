@@ -78,11 +78,16 @@ class DashboardController extends Controller
         $totalStudyMinutes = ($enrollments->where('status', 'completed')->count() * 320) + ($enrollments->where('status', 'active')->sum('progress') * 4.5);
         $totalStudyHours = round($totalStudyMinutes / 60, 1);
 
-        // Chart Data: simulated last 7 days study hours
-        $studyVelocity = [
-            'days' => ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-            'hours' => [1.2, 0.8, 2.4, 1.5, 3.0, 4.2, 2.1]
-        ];
+        $days = [];
+        $hours = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = now()->subDays($i);
+            $days[] = $date->format('D');
+            $actCount = ActivityLog::where('user_id', $user->id)->whereDate('created_at', $date)->count();
+            // Estimate 0.5 hours per activity logged that day
+            $hours[] = round($actCount * 0.5, 1);
+        }
+        $studyVelocity = ['days' => $days, 'hours' => $hours];
 
         return view('dashboard.student', compact(
             'enrollments',
@@ -127,10 +132,18 @@ class DashboardController extends Controller
         $revenue = $totalStudents * 29 * 0.70;
 
         // 3. Analytics data (monthly student signups)
-        $enrollmentTrend = [
-            'months' => ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
-            'signups' => [12, 19, 32, 45, $totalStudents]
-        ];
+        $months = [];
+        $signups = [];
+        for ($i = 4; $i >= 0; $i--) {
+            $date = now()->subMonths($i);
+            $months[] = $date->format('M');
+            $count = Enrollment::whereIn('course_id', $courseIds)
+                ->whereYear('created_at', $date->year)
+                ->whereMonth('created_at', $date->month)
+                ->count();
+            $signups[] = $count;
+        }
+        $enrollmentTrend = ['months' => $months, 'signups' => $signups];
 
         // 4. Recent enrollments list
         $recentEnrollments = Enrollment::with(['user', 'course'])
