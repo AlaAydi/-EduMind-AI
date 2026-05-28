@@ -23,47 +23,62 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. Create Default Users
+        // 0. Create Admin User (static credentials: aydiala123@gmail.com / 12345678)
+        User::create([
+            'name'        => 'Admin EduMind',
+            'email'       => 'aydiala123@gmail.com',
+            'password'    => Hash::make('12345678'),
+            'role'        => 'admin',
+            'is_approved' => true,
+            'avatar'      => 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
+        ]);
+
+        // 1. Create Default Users (is_approved = true so they can login immediately)
         $student = User::create([
-            'name' => 'Alex Rivers',
-            'email' => 'student@edumind.ai',
-            'password' => Hash::make('password'),
-            'role' => 'student',
-            'avatar' => 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
+            'name'        => 'Alex Rivers',
+            'email'       => 'student@edumind.ai',
+            'password'    => Hash::make('password'),
+            'role'        => 'student',
+            'is_approved' => true,
+            'avatar'      => 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
         ]);
 
         $teacher = User::create([
-            'name' => 'Dr. Sarah Jenkins',
-            'email' => 'teacher@edumind.ai',
-            'password' => Hash::make('password'),
-            'role' => 'teacher',
-            'avatar' => 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80',
+            'name'        => 'Dr. Sarah Jenkins',
+            'email'       => 'teacher@edumind.ai',
+            'password'    => Hash::make('password'),
+            'role'        => 'teacher',
+            'is_approved' => true,
+            'avatar'      => 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80',
         ]);
 
         $anotherStudent = User::create([
-            'name' => 'Michael Chen',
-            'email' => 'student2@edumind.ai',
-            'password' => Hash::make('password'),
-            'role' => 'student',
-            'avatar' => 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
+            'name'        => 'Michael Chen',
+            'email'       => 'student2@edumind.ai',
+            'password'    => Hash::make('password'),
+            'role'        => 'student',
+            'is_approved' => true,
+            'avatar'      => 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
         ]);
 
         $anotherTeacher = User::create([
-            'name' => 'Prof. Marcus Vance',
-            'email' => 'teacher2@edumind.ai',
-            'password' => Hash::make('password'),
-            'role' => 'teacher',
-            'avatar' => 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80',
+            'name'        => 'Prof. Marcus Vance',
+            'email'       => 'teacher2@edumind.ai',
+            'password'    => Hash::make('password'),
+            'role'        => 'teacher',
+            'is_approved' => true,
+            'avatar'      => 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80',
         ]);
 
-        // Extra students for stats
+        // Extra students for stats (is_approved = true)
         for ($i = 1; $i <= 15; $i++) {
             User::create([
-                'name' => 'Student ' . $i,
-                'email' => 'student' . $i . '@example.com',
-                'password' => Hash::make('password'),
-                'role' => 'student',
-                'avatar' => 'https://images.unsplash.com/photo-' . (1500000000000 + ($i * 1000000)) . '?auto=format&fit=crop&w=150&q=80',
+                'name'        => 'Student ' . $i,
+                'email'       => 'student' . $i . '@example.com',
+                'password'    => Hash::make('password'),
+                'role'        => 'student',
+                'is_approved' => true,
+                'avatar'      => 'https://images.unsplash.com/photo-' . (1500000000000 + ($i * 1000000)) . '?auto=format&fit=crop&w=150&q=80',
             ]);
         }
 

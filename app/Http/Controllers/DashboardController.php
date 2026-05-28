@@ -19,6 +19,11 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
+        // Admin should never land on this dashboard
+        if ($user->isAdmin()) {
+            return redirect()->route('admin.dashboard');
+        }
+
         if ($user->isTeacher()) {
             return $this->teacherDashboard($user);
         }

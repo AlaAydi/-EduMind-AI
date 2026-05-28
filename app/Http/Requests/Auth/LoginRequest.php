@@ -50,6 +50,16 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        // Block non-admin users who are not approved yet
+        $user = Auth::user();
+        if ($user->role !== 'admin' && ! $user->is_approved) {
+            Auth::logout();
+            RateLimiter::hit($this->throttleKey());
+            throw ValidationException::withMessages([
+                'email' => 'Votre compte est en attente d\'approbation par l\'administrateur.',
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
     }
 

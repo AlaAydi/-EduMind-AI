@@ -37,7 +37,7 @@ class RegisteredUserController extends Controller
             'role' => ['required', 'string', 'in:student,teacher'],
         ]);
 
-        $avatar = $request->role === 'teacher' 
+        $avatar = $request->role === 'teacher'
             ? 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80'
             : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80';
 
@@ -47,12 +47,12 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),
             'role' => $request->role,
             'avatar' => $avatar,
+            'is_approved' => false,
         ]);
 
         event(new Registered($user));
 
-        Auth::login($user);
-
-        return redirect(route('dashboard', absolute: false));
+        // Do NOT auto-login — require admin approval first
+        return redirect()->route('login')->with('status', 'Votre compte a été créé. Veuillez attendre l\'approbation de l\'administrateur avant de vous connecter.');
     }
 }
