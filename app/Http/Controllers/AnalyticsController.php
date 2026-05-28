@@ -13,15 +13,15 @@ class AnalyticsController extends Controller
 {
     public function index()
     {
-        $user = Auth::user();
-        
+  
+
         $totalStudents = User::where('role', 'student')->count();
         $totalCourses = Course::count();
-        
+
         $totalEnrollments = Enrollment::count();
         $completedEnrollments = Enrollment::where('status', 'completed')->count();
         $completionRate = $totalEnrollments > 0 ? round(($completedEnrollments / $totalEnrollments) * 100) : 0;
-        
+
         $activeLearners = User::whereHas('enrollments', function($q) {
             $q->where('status', 'active');
         })->count();
