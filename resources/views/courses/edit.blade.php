@@ -67,7 +67,7 @@
                     <!-- Thumbnail URL -->
                     <div>
                         <x-input-label for="thumbnail" :value="__('Thumbnail Image URL')" />
-                        <x-text-input id="thumbnail" name="thumbnail" class="block w-full text-xs py-2.5 px-3" type="url" value="{{ $course->thumbnail }}" />
+                        <x-text-input id="thumbnail" name="thumbnail" class="block w-full text-xs py-2.5 px-3" type="text" value="{{ $course->thumbnail }}" />
                         <x-input-error :messages="$errors->get('thumbnail')" class="mt-2" />
                     </div>
                 </div>

@@ -26,14 +26,24 @@ class CourseController extends Controller
             $query->where('teacher_id', $user->id);
         }
 
+        // If the user is a student, only show courses from their assigned categories
+        if ($user->isStudent()) {
+            $assignedCategoryIds = $user->categories()->pluck('categories.id')->toArray();
+            if (!empty($assignedCategoryIds)) {
+                $query->whereIn('category_id', $assignedCategoryIds);
+            }
+        }
+
         // Apply filters
         if ($request->filled('search')) {
-            $query->where('title', 'like', '%' . $request->search . '%')
+            $query->where(function ($q) use ($request) {
+                $q->where('title', 'like', '%' . $request->search . '%')
                   ->orWhere('description', 'like', '%' . $request->search . '%');
+            });
         }
 
         if ($request->filled('category')) {
-            $query->where('category', $request->category);
+            $query->where('category_id', $request->category);
         }
 
         if ($request->filled('level')) {
@@ -57,7 +67,8 @@ class CourseController extends Controller
             return redirect()->route('dashboard')->with('error', 'Only teachers can create courses.');
         }
 
-        $categories = Category::all();
+        // Only show categories assigned to this teacher by admin
+        $categories = Auth::user()->categories()->get();
         return view('courses.create', compact('categories'));
     }
 
@@ -76,7 +87,7 @@ class CourseController extends Controller
             'level' => 'required|string|in:Beginner,Intermediate,Advanced',
             'category_id' => 'required|exists:categories,id',
             'duration' => 'required|string|max:100',
-            'thumbnail' => 'nullable|url',
+            'thumbnail' => 'nullable|string',
         ]);
 
         $slug = Str::slug($request->title) . '-' . rand(100, 999);
@@ -132,7 +143,12 @@ class CourseController extends Controller
             return redirect()->route('dashboard')->with('error', 'Unauthorized.');
         }
 
-        $categories = Category::all();
+        // Teachers see only their assigned categories; admin sees all
+        if (Auth::user()->isAdmin()) {
+            $categories = Category::all();
+        } else {
+            $categories = Auth::user()->categories()->get();
+        }
         return view('courses.edit', compact('course', 'categories'));
     }
 
@@ -151,7 +167,7 @@ class CourseController extends Controller
             'level' => 'required|string|in:Beginner,Intermediate,Advanced',
             'category_id' => 'required|exists:categories,id',
             'duration' => 'required|string|max:100',
-            'thumbnail' => 'nullable|url',
+            'thumbnail' => 'nullable|string',
         ]);
 
         $course->update([

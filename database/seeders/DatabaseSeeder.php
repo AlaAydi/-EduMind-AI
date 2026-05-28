@@ -23,25 +23,35 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // 0. Create Admin User (static credentials: aydiala123@gmail.com / 12345678)
         User::create([
             'name'        => 'Admin EduMind',
             'email'       => 'aydiala123@gmail.com',
-            'password'    => Hash::make('12345678'),
+            'password'    => Hash::make('12345679'),
             'role'        => 'admin',
             'is_approved' => true,
             'avatar'      => 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
         ]);
 
-        // 1. Create Default Users (is_approved = true so they can login immediately)
-        $student = User::create([
-            'name'        => 'Alex Rivers',
-            'email'       => 'student@edumind.ai',
-            'password'    => Hash::make('password'),
+        // Additional Teacher
+        User::create([
+            'name'        => 'Teacher User',
+            'email'       => 'teacher@gmail.com',
+            'password'    => Hash::make('12345679'),
+            'role'        => 'teacher',
+            'is_approved' => true,
+            'avatar'      => 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80',
+        ]);
+
+        // Additional Student
+        User::create([
+            'name'        => 'Student User',
+            'email'       => 'student@gmail.com',
+            'password'    => Hash::make('12345679'),
             'role'        => 'student',
             'is_approved' => true,
             'avatar'      => 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
         ]);
+
 
         $teacher = User::create([
             'name'        => 'Dr. Sarah Jenkins',

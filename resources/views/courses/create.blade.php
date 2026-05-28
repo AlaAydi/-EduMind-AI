@@ -35,9 +35,11 @@
                     <div>
                         <x-input-label for="category_id" :value="__('Syllabus Category')" />
                         <select id="category_id" name="category_id" class="bg-slate-950/80 border-slate-800 text-slate-350 focus:border-purple-500 focus:ring-purple-500/30 rounded-xl shadow-sm transition-all duration-300 w-full text-xs font-semibold py-2.5 px-3 focus:outline-none" required>
-                            @foreach($categories as $category)
+                            @forelse($categories as $category)
                                 <option value="{{ $category->id }}">{{ $category->name }}</option>
-                            @endforeach
+                            @empty
+                                <option value="" disabled>Aucune catégorie assignée — contactez l'admin</option>
+                            @endforelse
                         </select>
                         <x-input-error :messages="$errors->get('category_id')" class="mt-2" />
                     </div>
@@ -66,7 +68,7 @@
                     <!-- Thumbnail URL -->
                     <div>
                         <x-input-label for="thumbnail" :value="__('Thumbnail Image URL')" />
-                        <x-text-input id="thumbnail" name="thumbnail" class="block w-full text-xs py-2.5 px-3" type="url" placeholder="e.g. https://unsplash.com/photo-..." />
+                        <x-text-input id="thumbnail" name="thumbnail" class="block w-full text-xs py-2.5 px-3" type="text" placeholder="e.g. https://unsplash.com/photo-..." />
                         <span class="text-[10px] text-slate-600 font-semibold mt-1.5 block">Leave blank for a modern placeholder image.</span>
                         <x-input-error :messages="$errors->get('thumbnail')" class="mt-2" />
                     </div>
