@@ -130,7 +130,7 @@
                     <span class="text-[9px] text-purple-400/80 font-bold uppercase tracking-wider block mt-1">{{ auth()->user()->role }}</span>
                 </div>
             </div>
-            
+
             <form method="POST" action="{{ route('logout') }}" class="flex-shrink-0 m-0 p-0">
                 @csrf
                 <button type="submit" class="p-1.5 rounded-lg text-slate-500 hover:bg-slate-800 hover:text-rose-400 transition-colors">

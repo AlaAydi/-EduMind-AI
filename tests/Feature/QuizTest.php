@@ -15,6 +15,15 @@ class QuizTest extends TestCase
 {
     use RefreshDatabase;
 
+    private const QUIZ_TITLE = 'OOP Core Quiz';
+
+    private const QUESTION_OOP = 'What are the principles of OOP?';
+
+    private const QUESTION_FRAMEWORK = 'Which is a PHP framework?';
+
+    private const ANSWER_OOP = 'A,B,C';
+    private const ANSWER_FRAMEWORK = 'A,B';
+
     private User $teacher;
     private User $student;
     private Category $category;
@@ -48,12 +57,12 @@ class QuizTest extends TestCase
     {
         $response = $this->actingAs($this->teacher)->post('/quizzes', [
             'course_id' => $this->course->id,
-            'title' => 'OOP Core Quiz',
+            'title' => self::QUIZ_TITLE,
             'description' => 'Test your OOP principles understanding',
             'passing_score' => 70,
             'questions' => [
                 [
-                    'question_text' => 'What are the principles of OOP?',
+                    'question_text' => self::QUESTION_OOP,
                     'option_a' => 'Heritage',
                     'option_b' => 'Polymorphism',
                     'option_c' => 'Abstraction',
@@ -61,7 +70,7 @@ class QuizTest extends TestCase
                     'correct_options' => ['A', 'B', 'C']
                 ],
                 [
-                    'question_text' => 'Which is a PHP framework?',
+                    'question_text' => self::QUESTION_FRAMEWORK,
                     'option_a' => 'Laravel',
                     'option_b' => 'Symfony',
                     'option_c' => 'React',
@@ -75,66 +84,64 @@ class QuizTest extends TestCase
         $response->assertRedirect('/quizzes');
 
         $this->assertDatabaseHas('quizzes', [
-            'title' => 'OOP Core Quiz',
+            'title' => self::QUIZ_TITLE,
             'passing_score' => 70,
         ]);
 
         $this->assertDatabaseHas('questions', [
-            'question_text' => 'What are the principles of OOP?',
-            'correct_option' => 'A,B,C',
+            'question_text' => self::QUESTION_OOP,
+            'correct_option' => self::ANSWER_OOP,
         ]);
 
         $this->assertDatabaseHas('questions', [
-            'question_text' => 'Which is a PHP framework?',
-            'correct_option' => 'A,B',
+            'question_text' => self::QUESTION_FRAMEWORK,
+            'correct_option' => self::ANSWER_FRAMEWORK,
         ]);
     }
 
     public function test_student_can_take_and_submit_quiz_and_be_graded_correctly(): void
     {
-        // 1. Enroll the student in the course
         Enrollment::create([
             'user_id' => $this->student->id,
             'course_id' => $this->course->id
         ]);
 
-        // 2. Create the quiz manually
         $quiz = Quiz::create([
             'course_id' => $this->course->id,
-            'title' => 'OOP Core Quiz',
+            'title' => self::QUIZ_TITLE,
             'description' => 'Test your OOP principles understanding',
             'passing_score' => 70
         ]);
 
         $q1 = Question::create([
             'quiz_id' => $quiz->id,
-            'question_text' => 'What are the principles of OOP?',
+            'question_text' => self::QUESTION_OOP,
             'option_a' => 'Heritage',
             'option_b' => 'Polymorphism',
             'option_c' => 'Abstraction',
             'option_d' => 'Procedural',
-            'correct_option' => 'A,B,C'
+            'correct_option' => self::ANSWER_OOP
         ]);
 
         $q2 = Question::create([
             'quiz_id' => $quiz->id,
-            'question_text' => 'Which is a PHP framework?',
+            'question_text' => self::QUESTION_FRAMEWORK,
             'option_a' => 'Laravel',
             'option_b' => 'Symfony',
             'option_c' => 'React',
             'option_d' => 'Django',
-            'correct_option' => 'A,B'
+            'correct_option' => self::ANSWER_FRAMEWORK
         ]);
 
-        // Case 1: Student answers both correctly
         $response = $this->actingAs($this->student)->post("/quizzes/{$quiz->id}/submit", [
             'answers' => [
-                $q1->id => ['C', 'A', 'B'], // Order doesn't matter
+                $q1->id => ['C', 'A', 'B'],
                 $q2->id => ['A', 'B']
             ]
         ]);
 
         $response->assertSessionHasNoErrors();
+
         $this->assertDatabaseHas('quiz_attempts', [
             'user_id' => $this->student->id,
             'quiz_id' => $quiz->id,
@@ -142,15 +149,15 @@ class QuizTest extends TestCase
             'passed' => true
         ]);
 
-        // Case 2: Student answers one correctly and one partially/incorrectly
         $response = $this->actingAs($this->student)->post("/quizzes/{$quiz->id}/submit", [
             'answers' => [
-                $q1->id => ['A', 'B'], // Missing 'C'
-                $q2->id => ['A', 'B']  // Correct
+                $q1->id => ['A', 'B'],
+                $q2->id => ['A', 'B']
             ]
         ]);
 
         $response->assertSessionHasNoErrors();
+
         $this->assertDatabaseHas('quiz_attempts', [
             'user_id' => $this->student->id,
             'quiz_id' => $quiz->id,

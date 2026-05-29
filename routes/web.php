@@ -11,6 +11,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
+use App\Http\Controllers\CourseDocumentController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [LandingController::class, 'index'])->name('home');
@@ -23,61 +24,135 @@ Route::post('/demo/switch-role', [DashboardController::class, 'switchRole'])
     ->middleware(['auth'])
     ->name('demo.switch-role');
 
-
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
 
-    Route::get('/courses', [CourseController::class, 'index'])->name('courses.index');
-    Route::get('/courses/create', [CourseController::class, 'create'])->name('courses.create');
-    Route::post('/courses', [CourseController::class, 'store'])->name('courses.store');
-    Route::get('/courses/{course}', [CourseController::class, 'show'])->name('courses.show');
-    Route::get('/courses/{course}/edit', [CourseController::class, 'edit'])->name('courses.edit');
-    Route::put('/courses/{course}', [CourseController::class, 'update'])->name('courses.update');
-    Route::delete('/courses/{course}', [CourseController::class, 'destroy'])->name('courses.destroy');
-    Route::post('/courses/{course}/enroll', [CourseController::class, 'enroll'])->name('courses.enroll');
-    Route::post('/courses/{course}/progress', [CourseController::class, 'updateProgress'])->name('courses.progress');
 
-    // Course Documents
-    Route::post('/courses/{course}/documents', [\App\Http\Controllers\CourseDocumentController::class, 'store'])->name('courses.documents.store');
-    Route::delete('/documents/{document}', [\App\Http\Controllers\CourseDocumentController::class, 'destroy'])->name('courses.documents.destroy');
+    Route::prefix('profile')->group(function () {
+        Route::get('/', [ProfileController::class, 'edit'])->name('profile.edit');
+        Route::patch('/', [ProfileController::class, 'update'])->name('profile.update');
+        Route::delete('/', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    });
 
-    Route::get('/quizzes', [QuizController::class, 'index'])->name('quizzes.index');
-    Route::get('/quizzes/create', [QuizController::class, 'create'])->name('quizzes.create');
-    Route::post('/quizzes', [QuizController::class, 'store'])->name('quizzes.store');
-    Route::get('/quizzes/{quiz}', [QuizController::class, 'show'])->name('quizzes.show');
-    Route::get('/quizzes/{quiz}/edit', [QuizController::class, 'edit'])->name('quizzes.edit');
-    Route::put('/quizzes/{quiz}', [QuizController::class, 'update'])->name('quizzes.update');
-    Route::delete('/quizzes/{quiz}', [QuizController::class, 'destroy'])->name('quizzes.destroy');
-    Route::get('/quizzes/{quiz}/take', [QuizController::class, 'take'])->name('quizzes.take');
-    Route::post('/quizzes/{quiz}/submit', [QuizController::class, 'submit'])->name('quizzes.submit');
-    Route::get('/quizzes/{quiz}/result/{attempt}', [QuizController::class, 'result'])->name('quizzes.result');
 
-    Route::get('/ai-chatbot', [AIChatbotController::class, 'index'])->name('ai-chatbot');
-    Route::post('/ai-chatbot', [AIChatbotController::class, 'sendMessage'])->name('ai-chatbot.message');
+    Route::prefix('courses')->controller(CourseController::class)->group(function () {
 
-    Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics');
+        Route::get('/', 'index')->name('courses.index');
 
-    Route::get('/progression', [ProgressionController::class, 'index'])->name('progression');
+        Route::get('/create', 'create')->name('courses.create');
+
+        Route::post('/', 'store')->name('courses.store');
+
+        Route::get('/{course}', 'show')->name('courses.show');
+
+        Route::get('/{course}/edit', 'edit')->name('courses.edit');
+
+        Route::put('/{course}', 'update')->name('courses.update');
+
+        Route::delete('/{course}', 'destroy')->name('courses.destroy');
+
+        Route::post('/{course}/enroll', 'enroll')->name('courses.enroll');
+
+        Route::post('/{course}/progress', 'updateProgress')->name('courses.progress');
+    });
+
+
+
+    Route::prefix('courses')->group(function () {
+
+        Route::post('/{course}/documents', [CourseDocumentController::class, 'store'])
+            ->name('courses.documents.store');
+    });
+
+    Route::delete('/documents/{document}', [CourseDocumentController::class, 'destroy'])
+        ->name('courses.documents.destroy');
+
+
+    Route::prefix('quizzes')->controller(QuizController::class)->group(function () {
+
+        Route::get('/', 'index')->name('quizzes.index');
+
+        Route::get('/create', 'create')->name('quizzes.create');
+
+        Route::post('/', 'store')->name('quizzes.store');
+
+        Route::get('/{quiz}', 'show')->name('quizzes.show');
+
+        Route::get('/{quiz}/edit', 'edit')->name('quizzes.edit');
+
+        Route::put('/{quiz}', 'update')->name('quizzes.update');
+
+        Route::delete('/{quiz}', 'destroy')->name('quizzes.destroy');
+
+        Route::get('/{quiz}/take', 'take')->name('quizzes.take');
+
+        Route::post('/{quiz}/submit', 'submit')->name('quizzes.submit');
+
+        Route::get('/{quiz}/result/{attempt}', 'result')->name('quizzes.result');
+    });
+
+
+
+    Route::prefix('ai-chatbot')->controller(AIChatbotController::class)->group(function () {
+
+        Route::get('/', 'index')->name('ai-chatbot');
+
+        Route::post('/', 'sendMessage')->name('ai-chatbot.message');
+    });
+
+
+
+    Route::get('/analytics', [AnalyticsController::class, 'index'])
+        ->name('analytics');
+
+    Route::get('/progression', [ProgressionController::class, 'index'])
+        ->name('progression');
 });
 
-Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(function () {
-    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
 
-    Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
-    Route::get('/users/{user}/edit', [AdminUserController::class, 'edit'])->name('users.edit');
-    Route::put('/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
-    Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
-    Route::post('/users/{user}/approve', [AdminUserController::class, 'approve'])->name('users.approve');
 
-    Route::get('/categories', [AdminCategoryController::class, 'index'])->name('categories.index');
-    Route::get('/categories/create', [AdminCategoryController::class, 'create'])->name('categories.create');
-    Route::post('/categories', [AdminCategoryController::class, 'store'])->name('categories.store');
-    Route::get('/categories/{category}/edit', [AdminCategoryController::class, 'edit'])->name('categories.edit');
-    Route::put('/categories/{category}', [AdminCategoryController::class, 'update'])->name('categories.update');
-    Route::delete('/categories/{category}', [AdminCategoryController::class, 'destroy'])->name('categories.destroy');
-});
+Route::prefix('admin')
+    ->middleware(['auth', 'admin'])
+    ->name('admin.')
+    ->group(function () {
 
-require __DIR__.'/auth.php';
+        Route::get('/dashboard', [AdminController::class, 'dashboard'])
+            ->name('dashboard');
+
+
+
+        Route::prefix('users')
+            ->controller(AdminUserController::class)
+            ->group(function () {
+
+                Route::get('/', 'index')->name('users.index');
+
+                Route::get('/{user}/edit', 'edit')->name('users.edit');
+
+                Route::put('/{user}', 'update')->name('users.update');
+
+                Route::delete('/{user}', 'destroy')->name('users.destroy');
+
+                Route::post('/{user}/approve', 'approve')->name('users.approve');
+            });
+
+
+        Route::prefix('categories')
+            ->controller(AdminCategoryController::class)
+            ->group(function () {
+
+                Route::get('/', 'index')->name('categories.index');
+
+                Route::get('/create', 'create')->name('categories.create');
+
+                Route::post('/', 'store')->name('categories.store');
+
+                Route::get('/{category}/edit', 'edit')->name('categories.edit');
+
+                Route::put('/{category}', 'update')->name('categories.update');
+
+                Route::delete('/{category}', 'destroy')->name('categories.destroy');
+            });
+    });
+
+require __DIR__ . '/auth.php';

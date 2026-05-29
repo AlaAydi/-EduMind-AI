@@ -3,18 +3,36 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+
         <title>EduMind AI - The Future of Intelligent E-Learning</title>
 
-        <!-- Fonts -->
+        <!-- Fonts (SAFE - no integrity needed for Google Fonts) -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
         <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-        <!-- Scripts -->
+        <!-- Scripts (Vite Laravel) -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
+
     <body class="font-sans antialiased bg-[#05030a] text-slate-100 min-h-screen overflow-x-hidden">
-        
+
+        <!-- Background Glowing Circles -->
+        <div class="absolute top-[-20%] left-[-20%] w-[60%] h-[60%] rounded-full bg-indigo-900/20 blur-[130px] pointer-events-none z-0"></div>
+        <div class="absolute top-[30%] right-[-10%] w-[50%] h-[50%] rounded-full bg-purple-900/15 blur-[120px] pointer-events-none z-0"></div>
+        <div class="absolute bottom-[-10%] left-[10%] w-[50%] h-[50%] rounded-full bg-pink-900/10 blur-[110px] pointer-events-none z-0"></div>
+
+        <!-- Navigation -->
+        <header class="relative z-10 max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
+            <a href="/" class="flex items-center gap-3">
+    
+
+
+            </a>
+        </header>
+    <body class="font-sans antialiased bg-[#05030a] text-slate-100 min-h-screen overflow-x-hidden">
+
         <!-- Background Glowing Circles -->
         <div class="absolute top-[-20%] left-[-20%] w-[60%] h-[60%] rounded-full bg-indigo-900/20 blur-[130px] pointer-events-none z-0"></div>
         <div class="absolute top-[30%] right-[-10%] w-[50%] h-[50%] rounded-full bg-purple-900/15 blur-[120px] pointer-events-none z-0"></div>
@@ -66,7 +84,7 @@
                     <span class="w-1.5 h-1.5 rounded-full bg-purple-400 animate-ping"></span>
                     <span class="text-xs font-bold text-purple-400 uppercase tracking-widest">Version 2.0 is Live</span>
                 </div>
-                
+
                 <h1 class="text-5xl lg:text-7xl font-black tracking-tight leading-[1.05] text-white">
                     Unlock Your Mind <br>
                     With <span class="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">Neural Learning</span>

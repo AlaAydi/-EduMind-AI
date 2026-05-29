@@ -10,13 +10,19 @@ class ProfileTest extends TestCase
 {
     use RefreshDatabase;
 
+    private const PROFILE_URI = '/profile';
+    private const TEST_USER_NAME = 'Test User';
+    private const TEST_EMAIL = 'test@example.com';
+    private const WRONG_PASSWORD = 'wrong-password';
+    private const CORRECT_PASSWORD = 'password';
+
     public function test_profile_page_is_displayed(): void
     {
         $user = User::factory()->create();
 
         $response = $this
             ->actingAs($user)
-            ->get('/profile');
+            ->get(self::PROFILE_URI);
 
         $response->assertOk();
     }
@@ -27,19 +33,19 @@ class ProfileTest extends TestCase
 
         $response = $this
             ->actingAs($user)
-            ->patch('/profile', [
-                'name' => 'Test User',
-                'email' => 'test@example.com',
+            ->patch(self::PROFILE_URI, [
+                'name' => self::TEST_USER_NAME,
+                'email' => self::TEST_EMAIL,
             ]);
 
         $response
             ->assertSessionHasNoErrors()
-            ->assertRedirect('/profile');
+            ->assertRedirect(self::PROFILE_URI);
 
         $user->refresh();
 
-        $this->assertSame('Test User', $user->name);
-        $this->assertSame('test@example.com', $user->email);
+        $this->assertSame(self::TEST_USER_NAME, $user->name);
+        $this->assertSame(self::TEST_EMAIL, $user->email);
         $this->assertNull($user->email_verified_at);
     }
 
@@ -49,14 +55,14 @@ class ProfileTest extends TestCase
 
         $response = $this
             ->actingAs($user)
-            ->patch('/profile', [
-                'name' => 'Test User',
+            ->patch(self::PROFILE_URI, [
+                'name' => self::TEST_USER_NAME,
                 'email' => $user->email,
             ]);
 
         $response
             ->assertSessionHasNoErrors()
-            ->assertRedirect('/profile');
+            ->assertRedirect(self::PROFILE_URI);
 
         $this->assertNotNull($user->refresh()->email_verified_at);
     }
@@ -67,8 +73,8 @@ class ProfileTest extends TestCase
 
         $response = $this
             ->actingAs($user)
-            ->delete('/profile', [
-                'password' => 'password',
+            ->delete(self::PROFILE_URI, [
+                'password' => self::CORRECT_PASSWORD,
             ]);
 
         $response
@@ -85,14 +91,14 @@ class ProfileTest extends TestCase
 
         $response = $this
             ->actingAs($user)
-            ->from('/profile')
-            ->delete('/profile', [
-                'password' => 'wrong-password',
+            ->from(self::PROFILE_URI)
+            ->delete(self::PROFILE_URI, [
+                'password' => self::WRONG_PASSWORD,
             ]);
 
         $response
             ->assertSessionHasErrorsIn('userDeletion', 'password')
-            ->assertRedirect('/profile');
+            ->assertRedirect(self::PROFILE_URI);
 
         $this->assertNotNull($user->fresh());
     }
